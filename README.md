@@ -63,7 +63,75 @@ Or just ask naturally:
 - "Remember that we decided to use PostgreSQL"
 - "What did we decide about the database?"
 
-### 4. Environment Variables (Optional)
+### 4. Automatic Memory Search (Optional)
+
+Want Claude to search memory automatically without explicit `/memory-search`? Three options:
+
+#### Option A: CLAUDE.md Instructions (Simplest)
+
+Add to your project's `CLAUDE.md`:
+```markdown
+## Memory
+When questions relate to past decisions, preferences, architecture choices,
+or "what did we decide about X", search memory first using /memory-search.
+```
+
+#### Option B: SessionStart Hook
+
+Inject top memories at session start. Create `.claude/hooks.json`:
+```json
+{
+  "hooks": {
+    "SessionStart": [{
+      "command": "bun ~/projects/memory-search/scripts/search.ts \"project context preferences decisions\"",
+      "timeout": 30000
+    }]
+  }
+}
+```
+
+#### Option C: UserPromptSubmit Hook (Most Automatic)
+
+Search memory for every user message. Create `.claude/hooks.json`:
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [{
+      "command": "bun ~/projects/memory-search/scripts/context-inject.ts",
+      "timeout": 10000
+    }]
+  }
+}
+```
+
+Then create `scripts/context-inject.ts`:
+```typescript
+#!/usr/bin/env bun
+import { MemoryIndex } from "../src/index";
+
+const input = await Bun.stdin.json();
+const query = input.user_message?.slice(0, 200) || "";
+
+if (!query.trim()) process.exit(0);
+
+const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+const memory = await MemoryIndex.create({ workspaceDir: projectDir });
+await memory.sync();
+
+const results = await memory.search(query, { maxResults: 3, minScore: 0.4 });
+await memory.close();
+
+if (results.length > 0) {
+  const context = results.map(r => `**${r.path}** (lines ${r.startLine}-${r.endLine}):\n${r.snippet}`).join("\n\n");
+  console.log(JSON.stringify({
+    additionalContext: `## Relevant Memory\n\n${context}`
+  }));
+}
+```
+
+**Recommendation:** Start with Option A. Add hooks later if you want fully automatic injection.
+
+### 5. Environment Variables (Optional)
 
 For faster search queries, set an OpenAI API key:
 ```bash
