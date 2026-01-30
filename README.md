@@ -10,19 +10,81 @@ A standalone memory search module with hybrid search (70% vector similarity + 30
 - `bun:sqlite` storage (no native extensions needed)
 - Support for `MEMORY.md` + `memory/*.md` files
 - Embedding cache for efficiency
+- **Claude Code skills** for easy integration
 
 ## Installation
 
 ```bash
-bun add memory-search
+cd ~/projects/memory-search
+bun install
 ```
 
-For local embeddings (optional):
+For local embeddings (optional, ~600MB model download on first use):
 ```bash
 bun add node-llama-cpp
 ```
 
-## Usage
+## Claude Code Integration
+
+### 1. Copy Skills to Your Project
+
+```bash
+cp -r ~/projects/memory-search/skills/remember ~/.claude/skills/
+cp -r ~/projects/memory-search/skills/memory-search ~/.claude/skills/
+```
+
+Or symlink them:
+```bash
+ln -s ~/projects/memory-search/skills/remember ~/.claude/skills/remember
+ln -s ~/projects/memory-search/skills/memory-search ~/.claude/skills/memory-search
+```
+
+### 2. Create Memory Files
+
+In your project:
+```bash
+touch MEMORY.md
+mkdir -p memory
+```
+
+### 3. Use the Skills
+
+**To save information:**
+```
+/remember that I prefer TypeScript over JavaScript
+```
+
+**To search memories:**
+```
+/memory-search authentication implementation
+```
+
+Or just ask naturally:
+- "Remember that we decided to use PostgreSQL"
+- "What did we decide about the database?"
+
+### 4. Environment Variables (Optional)
+
+For faster search queries, set an OpenAI API key:
+```bash
+export OPENAI_API_KEY=sk-...
+```
+
+Without this, local embeddings are used (slower first load, but free).
+
+## CLI Scripts
+
+### Search
+```bash
+bun ~/projects/memory-search/scripts/search.ts "your query"
+```
+
+### Sync Index
+```bash
+bun ~/projects/memory-search/scripts/sync.ts [--force]
+```
+
+## Programmatic Usage
 
 ```typescript
 import { MemoryIndex } from "memory-search";
@@ -32,7 +94,7 @@ const memory = await MemoryIndex.create({
   workspaceDir: "./my-project",
 });
 
-// Or with OpenAI
+// Or with OpenAI (faster queries)
 const memory = await MemoryIndex.create({
   workspaceDir: "./my-project",
   embeddingProvider: "openai",
@@ -55,6 +117,29 @@ const status = memory.status();
 // Clean up
 await memory.close();
 ```
+
+## Memory File Structure
+
+```
+your-project/
+├── MEMORY.md           # Long-term: preferences, patterns, decisions
+└── memory/
+    ├── 2024-01-15.md   # Daily notes
+    ├── 2024-01-16.md
+    └── architecture.md # Topic-specific memory
+```
+
+### MEMORY.md (Permanent)
+- User preferences
+- Project decisions
+- Coding patterns
+- Architecture choices
+
+### memory/*.md (Contextual)
+- Daily session notes
+- Work in progress
+- Ideas to explore
+- Meeting notes
 
 ## Configuration
 
@@ -84,12 +169,6 @@ interface MemoryConfig {
 }
 ```
 
-## File Structure
-
-The module indexes these files from your workspace:
-- `MEMORY.md` or `memory.md` in the root
-- All `.md` files under the `memory/` directory
-
 ## Development
 
 ```bash
@@ -105,6 +184,14 @@ bun run typecheck
 # Build
 bun run build
 ```
+
+## How It Works
+
+1. **Indexing**: Scans `MEMORY.md` and `memory/*.md`, chunks into ~400 token pieces
+2. **Embedding**: Converts chunks to vectors (local or OpenAI)
+3. **Storage**: SQLite database with FTS5 for keyword search
+4. **Search**: Hybrid (70% vector similarity + 30% BM25 keyword)
+5. **Caching**: Embeddings cached to avoid re-computation
 
 ## License
 
