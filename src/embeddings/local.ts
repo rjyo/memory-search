@@ -40,7 +40,16 @@ export async function createLocalEmbeddingProvider(
       llama = await getLlama({ logLevel: LlamaLogLevel.error });
     }
     if (!embeddingModel) {
-      const resolved = await resolveModelFile(modelPath, cacheDir || undefined);
+      const resolved = await resolveModelFile(modelPath, {
+        directory: cacheDir || undefined,
+        onProgress: ({ downloadedSize, totalSize }) => {
+          if (totalSize > 0) {
+            const pct = Math.round((downloadedSize / totalSize) * 100);
+            process.stderr.write(`\rDownloading embedding model... ${pct}%`);
+            if (pct >= 100) process.stderr.write("\n");
+          }
+        },
+      });
       embeddingModel = await llama.loadModel({ modelPath: resolved });
     }
     if (!embeddingContext) {

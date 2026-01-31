@@ -110,7 +110,9 @@ your-project/
 
 ## Configuration
 
-Local embeddings work out of the box (first run downloads a small model).
+Local embeddings work out of the box.
+
+> **First Run Note:** The first query downloads a ~300MB embedding model to `~/.cache/memory-search`. This is a one-time download with progress shown in stderr. Subsequent runs use the cached model.
 
 For faster embeddings, you can optionally use OpenAI:
 ```bash
