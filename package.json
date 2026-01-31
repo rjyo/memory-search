@@ -46,8 +46,7 @@
     "url": "https://github.com/rjyo/memory-search/issues"
   },
   "homepage": "https://github.com/rjyo/memory-search#readme",
-  "dependencies": {},
-  "optionalDependencies": {
+  "dependencies": {
     "node-llama-cpp": "^3.15.0"
   },
   "devDependencies": {
