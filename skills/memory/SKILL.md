@@ -1,12 +1,14 @@
 ---
 name: memory
 description: Project memory system - save and search past decisions, preferences, context, and notes. Use when user says "remember this", asks "what did we decide about X", or wants to recall/store information.
-allowed-tools: Bash(bunx memory-search:*), Bash(bunx memory-sync:*), Read, Write, Edit
+allowed-tools: Bash(bunx memory-search:*), Read, Write, Edit
 ---
 
 # Memory
 
 A hybrid search memory system for your project. Save important information and find it later using semantic search.
+
+> **First run:** If slow on first use, run `bunx memory-search --warmup` to pre-download the embedding model (~300MB).
 
 ## Memory File Structure
 
@@ -80,7 +82,7 @@ When the user says "remember this", "save this", "note that", or wants to store 
 4. **Run sync** after saving to update the search index
 
 ```bash
-bunx memory-sync
+bunx memory-search --sync
 ```
 
 ### Example: MEMORY.md

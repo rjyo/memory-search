@@ -112,7 +112,7 @@ your-project/
 
 Local embeddings work out of the box.
 
-> **First Run Note:** The first query downloads a ~300MB embedding model to `~/.cache/memory-search`. This is a one-time download with progress shown in stderr. Subsequent runs use the cached model.
+> **First Run:** The first query downloads a ~300MB embedding model. Run `bunx memory-search --warmup` after installing to pre-download it.
 
 For faster embeddings, you can optionally use OpenAI:
 ```bash

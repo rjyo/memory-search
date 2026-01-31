@@ -6,10 +6,41 @@
 
 import { MemoryIndex } from "../dist/index.js";
 
-const query = process.argv.slice(2).join(" ");
+const args = process.argv.slice(2);
+const query = args.join(" ");
+
+const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+
+if (args[0] === "--warmup") {
+  console.log("Warming up embedding model (first-time download ~300MB)...");
+  const memory = await MemoryIndex.create({
+    workspaceDir: projectDir,
+    embeddingProvider: "local",
+  });
+  await memory.close();
+  console.log("Done! Model is ready for use.");
+  process.exit(0);
+}
+
+if (args[0] === "--sync" || args[0] === "sync") {
+  const force = args.includes("--force");
+  console.log(`Syncing memory index for: ${projectDir}`);
+  const memory = await MemoryIndex.create({
+    workspaceDir: projectDir,
+    embeddingProvider: process.env.OPENAI_API_KEY ? "openai" : "auto",
+    openaiApiKey: process.env.OPENAI_API_KEY,
+  });
+  await memory.sync({ force });
+  const status = memory.status();
+  console.log(`Index synced: ${status.files} files, ${status.chunks} chunks`);
+  await memory.close();
+  process.exit(0);
+}
 
 if (!query.trim() || query === "--help" || query === "-h") {
   console.log("Usage: memory-search \"your query\"");
+  console.log("       memory-search --sync      # Sync index with files");
+  console.log("       memory-search --warmup    # Pre-download embedding model");
   console.log("Example: memory-search \"database decision\"");
   console.log("");
   console.log("Environment:");
@@ -17,8 +48,6 @@ if (!query.trim() || query === "--help" || query === "-h") {
   console.log("  OPENAI_API_KEY      Use OpenAI for faster queries");
   process.exit(query.trim() ? 0 : 1);
 }
-
-const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 
 try {
   const memory = await MemoryIndex.create({
