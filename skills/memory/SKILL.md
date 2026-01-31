@@ -1,20 +1,12 @@
 ---
 name: memory
 description: Project memory system - save and search past decisions, preferences, context, and notes. Use when user says "remember this", asks "what did we decide about X", or wants to recall/store information.
-allowed-tools: Bash(memory-search:*), Bash(memory-sync:*), Read, Write, Edit
+allowed-tools: Bash(npx memory-search@latest:*), Bash(npx -p memory-search memory-sync:*), Read, Write, Edit
 ---
 
 # Memory
 
 A hybrid search memory system for your project. Save important information and find it later using semantic search.
-
-## Setup (One-time)
-
-If not already installed, the user needs to run:
-
-```bash
-npm install -g memory-search
-```
 
 ## Memory File Structure
 
@@ -32,16 +24,16 @@ project/
 When the user asks about past decisions, preferences, or wants to recall information:
 
 ```bash
-memory-search "QUERY_HERE"
+npx memory-search@latest "QUERY_HERE"
 ```
 
 ### Search Examples
 
 ```bash
-memory-search "database choice decision"
-memory-search "error handling pattern"
-memory-search "user preferences coding style"
-memory-search "authentication implementation"
+npx memory-search@latest "database choice decision"
+npx memory-search@latest "error handling pattern"
+npx memory-search@latest "user preferences coding style"
+npx memory-search@latest "authentication implementation"
 ```
 
 ### Output Format
@@ -88,7 +80,7 @@ When the user says "remember this", "save this", "note that", or wants to store 
 4. **Run sync** after saving to update the search index
 
 ```bash
-memory-sync
+npx -p memory-search memory-sync
 ```
 
 ### Example: MEMORY.md

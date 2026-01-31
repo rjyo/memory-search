@@ -22,22 +22,9 @@ Based on the memory system from [OpenClaw](https://github.com/openclaw/openclaw)
 npx skills add rjyo/memory-search
 ```
 
-This installs the `/memory` skill to your coding agent.
+This installs the `/memory` skill to your coding agent (Claude Code, Cursor, Codex, etc.).
 
-### 2. Install the CLI
-
-```bash
-npm install -g memory-search
-```
-
-### 3. Create Memory Files
-
-```bash
-touch MEMORY.md
-mkdir -p memory
-```
-
-### 4. Use It
+### 2. Use It
 
 **Save information:**
 ```
@@ -51,73 +38,24 @@ mkdir -p memory
 
 Or just ask naturally - the skill triggers on phrases like "remember this" or "what did we decide about X".
 
-## Alternative Installation
-
-### Install CLI Only (No Skill)
-
-```bash
-# From npm (when published)
-npm install -g memory-search
-
-# From source
-git clone https://github.com/rjyo/memory-search
-cd memory-search
-bun install && bun run build
-npm link
-```
-
-### Local Embeddings (Optional)
-
-For free, offline embeddings (~600MB model download on first use):
-```bash
-npm install -g node-llama-cpp
-```
-
-### OpenAI Embeddings (Faster)
-
-```bash
-export OPENAI_API_KEY=sk-...
-```
-
 ## Automatic Memory Injection (Optional)
 
-Want Claude to search memory automatically? Add to your `.claude/hooks.json`:
-
-```json
-{
-  "hooks": {
-    "SessionStart": [{
-      "command": "memory-search \"project context preferences decisions\"",
-      "timeout": 30000
-    }]
-  }
-}
-```
-
-Or add to your `CLAUDE.md`:
+Want Claude to search memory automatically? Add to your `CLAUDE.md`:
 ```markdown
 ## Memory
 When questions relate to past decisions or preferences, use /memory to search first.
 ```
 
-## CLI Commands
-
-### Search
-```bash
-memory-search "your query"
-memory-search --help
-```
-
-### Sync Index
-```bash
-memory-sync [--force]
-memory-sync --help
-```
-
-### Development Scripts (from source)
-```bash
-bun scripts/search.ts "your query"
-bun scripts/sync.ts [--force]
+Or use a hook in `.claude/hooks.json`:
+```json
+{
+  "hooks": {
+    "SessionStart": [{
+      "command": "npx memory-search@latest \"project context preferences decisions\"",
+      "timeout": 30000
+    }]
+  }
+}
 ```
 
 ## Programmatic Usage
@@ -178,6 +116,15 @@ your-project/
 - Meeting notes
 
 ## Configuration
+
+For faster embeddings, set your OpenAI API key:
+```bash
+export OPENAI_API_KEY=sk-...
+```
+
+Without this, local embeddings are used (free, but slower on first run).
+
+### Full Options
 
 ```typescript
 interface MemoryConfig {
