@@ -2,7 +2,7 @@
 
 A hybrid search memory system for coding agents (70% vector similarity + 30% BM25 keyword).
 
-Inspired by the memory system in [OpenClaw](https://github.com/openclaw/openclaw) (originally Clawdbot).
+Based on the memory system from [OpenClaw](https://github.com/openclaw/openclaw) (originally Clawdbot).
 
 ## Features
 
