@@ -1,6 +1,6 @@
 {
   "name": "memory-search",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Hybrid search memory system for coding agents (vector + BM25)",
   "type": "module",
   "main": "./dist/index.js",
