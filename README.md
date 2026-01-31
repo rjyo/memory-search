@@ -19,7 +19,7 @@ Based on the memory system from [OpenClaw](https://github.com/openclaw/openclaw)
 ### 1. Install the Skill
 
 ```bash
-npx skills add rjyo/memory-search
+bunx skills add rjyo/memory-search
 ```
 
 This installs the `/memory` skill to your coding agent (Claude Code, Cursor, Codex, etc.).
@@ -51,7 +51,7 @@ Or use a hook in `.claude/hooks.json`:
 {
   "hooks": {
     "SessionStart": [{
-      "command": "npx memory-search@latest \"project context preferences decisions\"",
+      "command": "bunx memory-search \"project context preferences decisions\"",
       "timeout": 30000
     }]
   }

@@ -1,7 +1,7 @@
 ---
 name: memory
 description: Project memory system - save and search past decisions, preferences, context, and notes. Use when user says "remember this", asks "what did we decide about X", or wants to recall/store information.
-allowed-tools: Bash(npx memory-search@latest:*), Bash(npx -p memory-search memory-sync:*), Read, Write, Edit
+allowed-tools: Bash(bunx memory-search:*), Bash(bunx memory-sync:*), Read, Write, Edit
 ---
 
 # Memory
@@ -24,16 +24,16 @@ project/
 When the user asks about past decisions, preferences, or wants to recall information:
 
 ```bash
-npx memory-search@latest "QUERY_HERE"
+bunx memory-search "QUERY_HERE"
 ```
 
 ### Search Examples
 
 ```bash
-npx memory-search@latest "database choice decision"
-npx memory-search@latest "error handling pattern"
-npx memory-search@latest "user preferences coding style"
-npx memory-search@latest "authentication implementation"
+bunx memory-search "database choice decision"
+bunx memory-search "error handling pattern"
+bunx memory-search "user preferences coding style"
+bunx memory-search "authentication implementation"
 ```
 
 ### Output Format
@@ -80,7 +80,7 @@ When the user says "remember this", "save this", "note that", or wants to store 
 4. **Run sync** after saving to update the search index
 
 ```bash
-npx -p memory-search memory-sync
+bunx memory-sync
 ```
 
 ### Example: MEMORY.md
