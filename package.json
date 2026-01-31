@@ -1,6 +1,7 @@
 {
   "name": "memory-search",
   "version": "1.0.0",
+  "description": "Hybrid search memory system for coding agents (vector + BM25)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,12 +15,37 @@
     "memory-search": "./dist/bin/memory-search.js",
     "memory-sync": "./dist/bin/memory-sync.js"
   },
+  "files": [
+    "dist",
+    "skills"
+  ],
   "scripts": {
     "build": "bun build ./src/index.ts --outdir ./dist --target node --external node-llama-cpp && bun build ./bin/memory-search.ts ./bin/memory-sync.ts --outdir ./dist/bin --target node --external node-llama-cpp",
+    "prepublishOnly": "bun run build",
     "test": "bun test",
     "test:coverage": "bun test --coverage",
     "typecheck": "tsc --noEmit"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rjyo/memory-search.git"
+  },
+  "keywords": [
+    "memory",
+    "search",
+    "vector",
+    "embeddings",
+    "bm25",
+    "claude-code",
+    "coding-agent",
+    "skills"
+  ],
+  "author": "rjyo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rjyo/memory-search/issues"
+  },
+  "homepage": "https://github.com/rjyo/memory-search#readme",
   "dependencies": {},
   "optionalDependencies": {
     "node-llama-cpp": "^3.15.0"
