@@ -7,8 +7,8 @@ Based on the memory system from [OpenClaw](https://github.com/openclaw/openclaw)
 ## Features
 
 - Hybrid search combining vector similarity and keyword matching
-- Local embeddings via `node-llama-cpp` (EmbeddingGemma 300M, 768 dims)
-- OpenAI fallback when local unavailable
+- Local embeddings included (no API key needed)
+- Optional OpenAI embeddings for faster queries
 - `bun:sqlite` storage (no native extensions needed)
 - Support for `MEMORY.md` + `memory/*.md` files
 - Embedding cache for efficiency
@@ -63,16 +63,9 @@ Or use a hook in `.claude/hooks.json`:
 ```typescript
 import { MemoryIndex } from "memory-search";
 
-// Create with local embeddings (no API key needed)
+// Create index (uses local embeddings by default)
 const memory = await MemoryIndex.create({
   workspaceDir: "./my-project",
-});
-
-// Or with OpenAI (faster queries)
-const memory = await MemoryIndex.create({
-  workspaceDir: "./my-project",
-  embeddingProvider: "openai",
-  openaiApiKey: process.env.OPENAI_API_KEY,
 });
 
 // Index files
@@ -117,12 +110,12 @@ your-project/
 
 ## Configuration
 
-For faster embeddings, set your OpenAI API key:
+Local embeddings work out of the box (first run downloads a small model).
+
+For faster embeddings, you can optionally use OpenAI:
 ```bash
 export OPENAI_API_KEY=sk-...
 ```
-
-Without this, local embeddings are used (free, but slower on first run).
 
 ### Full Options
 
@@ -133,9 +126,9 @@ interface MemoryConfig {
   // Database
   dbPath?: string;            // Default: {workspaceDir}/.memory.sqlite
 
-  // Embeddings (auto-detects: local → openai → error)
-  embeddingProvider?: 'local' | 'openai' | 'auto';  // Default: auto
-  openaiApiKey?: string;      // Required if provider is 'openai'
+  // Embeddings
+  embeddingProvider?: 'local' | 'openai';  // Default: local
+  openaiApiKey?: string;      // Required for 'openai' provider
   openaiModel?: string;       // Default: text-embedding-3-small
   localModelPath?: string;    // Default: hf:ggml-org/embeddinggemma-300M-GGUF/...
   modelCacheDir?: string;     // Default: ~/.cache/memory-search
@@ -171,7 +164,7 @@ bun run build
 ## How It Works
 
 1. **Indexing**: Scans `MEMORY.md` and `memory/*.md`, chunks into ~400 token pieces
-2. **Embedding**: Converts chunks to vectors (local or OpenAI)
+2. **Embedding**: Converts chunks to vectors via local model (or OpenAI)
 3. **Storage**: SQLite database with FTS5 for keyword search
 4. **Search**: Hybrid (70% vector similarity + 30% BM25 keyword)
 5. **Caching**: Embeddings cached to avoid re-computation
