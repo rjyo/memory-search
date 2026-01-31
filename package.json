@@ -10,8 +10,12 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "bin": {
+    "memory-search": "./dist/bin/memory-search.js",
+    "memory-sync": "./dist/bin/memory-sync.js"
+  },
   "scripts": {
-    "build": "bun build ./src/index.ts --outdir ./dist --target node --external node-llama-cpp",
+    "build": "bun build ./src/index.ts --outdir ./dist --target node --external node-llama-cpp && bun build ./bin/memory-search.ts ./bin/memory-sync.ts --outdir ./dist/bin --target node --external node-llama-cpp",
     "test": "bun test",
     "test:coverage": "bun test --coverage",
     "typecheck": "tsc --noEmit"

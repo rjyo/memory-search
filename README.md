@@ -1,6 +1,8 @@
 # memory-search
 
-A standalone memory search module with hybrid search (70% vector similarity + 30% BM25 keyword).
+A hybrid search memory system for coding agents (70% vector similarity + 30% BM25 keyword).
+
+Inspired by the memory system in [OpenClaw](https://github.com/openclaw/openclaw) (originally Clawdbot).
 
 ## Features
 
@@ -10,146 +12,112 @@ A standalone memory search module with hybrid search (70% vector similarity + 30
 - `bun:sqlite` storage (no native extensions needed)
 - Support for `MEMORY.md` + `memory/*.md` files
 - Embedding cache for efficiency
-- **Claude Code skills** for easy integration
+- Works with Claude Code, Cursor, Codex, and 30+ other agents
 
-## Installation
+## Quick Start
 
-```bash
-cd ~/projects/memory-search
-bun install
-```
-
-For local embeddings (optional, ~600MB model download on first use):
-```bash
-bun add node-llama-cpp
-```
-
-## Claude Code Integration
-
-### 1. Copy Skills to Your Project
+### 1. Install the Skill
 
 ```bash
-cp -r ~/projects/memory-search/skills/remember ~/.claude/skills/
-cp -r ~/projects/memory-search/skills/memory-search ~/.claude/skills/
+npx skills add rjyo/memory-search
 ```
 
-Or symlink them:
+This installs the `/memory` skill to your coding agent.
+
+### 2. Install the CLI
+
 ```bash
-ln -s ~/projects/memory-search/skills/remember ~/.claude/skills/remember
-ln -s ~/projects/memory-search/skills/memory-search ~/.claude/skills/memory-search
+npm install -g memory-search
 ```
 
-### 2. Create Memory Files
+### 3. Create Memory Files
 
-In your project:
 ```bash
 touch MEMORY.md
 mkdir -p memory
 ```
 
-### 3. Use the Skills
+### 4. Use It
 
-**To save information:**
+**Save information:**
 ```
-/remember that I prefer TypeScript over JavaScript
-```
-
-**To search memories:**
-```
-/memory-search authentication implementation
+/memory remember that I prefer TypeScript over JavaScript
 ```
 
-Or just ask naturally:
-- "Remember that we decided to use PostgreSQL"
-- "What did we decide about the database?"
-
-### 4. Automatic Memory Search (Optional)
-
-Want Claude to search memory automatically without explicit `/memory-search`? Three options:
-
-#### Option A: CLAUDE.md Instructions (Simplest)
-
-Add to your project's `CLAUDE.md`:
-```markdown
-## Memory
-When questions relate to past decisions, preferences, architecture choices,
-or "what did we decide about X", search memory first using /memory-search.
+**Search memories:**
+```
+/memory what did we decide about authentication?
 ```
 
-#### Option B: SessionStart Hook
+Or just ask naturally - the skill triggers on phrases like "remember this" or "what did we decide about X".
 
-Inject top memories at session start. Create `.claude/hooks.json`:
+## Alternative Installation
+
+### Install CLI Only (No Skill)
+
+```bash
+# From npm (when published)
+npm install -g memory-search
+
+# From source
+git clone https://github.com/rjyo/memory-search
+cd memory-search
+bun install && bun run build
+npm link
+```
+
+### Local Embeddings (Optional)
+
+For free, offline embeddings (~600MB model download on first use):
+```bash
+npm install -g node-llama-cpp
+```
+
+### OpenAI Embeddings (Faster)
+
+```bash
+export OPENAI_API_KEY=sk-...
+```
+
+## Automatic Memory Injection (Optional)
+
+Want Claude to search memory automatically? Add to your `.claude/hooks.json`:
+
 ```json
 {
   "hooks": {
     "SessionStart": [{
-      "command": "bun ~/projects/memory-search/scripts/search.ts \"project context preferences decisions\"",
+      "command": "memory-search \"project context preferences decisions\"",
       "timeout": 30000
     }]
   }
 }
 ```
 
-#### Option C: UserPromptSubmit Hook (Most Automatic)
-
-Search memory for every user message. Create `.claude/hooks.json`:
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [{
-      "command": "bun ~/projects/memory-search/scripts/context-inject.ts",
-      "timeout": 10000
-    }]
-  }
-}
+Or add to your `CLAUDE.md`:
+```markdown
+## Memory
+When questions relate to past decisions or preferences, use /memory to search first.
 ```
 
-Then create `scripts/context-inject.ts`:
-```typescript
-#!/usr/bin/env bun
-import { MemoryIndex } from "../src/index";
-
-const input = await Bun.stdin.json();
-const query = input.user_message?.slice(0, 200) || "";
-
-if (!query.trim()) process.exit(0);
-
-const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-const memory = await MemoryIndex.create({ workspaceDir: projectDir });
-await memory.sync();
-
-const results = await memory.search(query, { maxResults: 3, minScore: 0.4 });
-await memory.close();
-
-if (results.length > 0) {
-  const context = results.map(r => `**${r.path}** (lines ${r.startLine}-${r.endLine}):\n${r.snippet}`).join("\n\n");
-  console.log(JSON.stringify({
-    additionalContext: `## Relevant Memory\n\n${context}`
-  }));
-}
-```
-
-**Recommendation:** Start with Option A. Add hooks later if you want fully automatic injection.
-
-### 5. Environment Variables (Optional)
-
-For faster search queries, set an OpenAI API key:
-```bash
-export OPENAI_API_KEY=sk-...
-```
-
-Without this, local embeddings are used (slower first load, but free).
-
-## CLI Scripts
+## CLI Commands
 
 ### Search
 ```bash
-bun ~/projects/memory-search/scripts/search.ts "your query"
+memory-search "your query"
+memory-search --help
 ```
 
 ### Sync Index
 ```bash
-bun ~/projects/memory-search/scripts/sync.ts [--force]
+memory-sync [--force]
+memory-sync --help
+```
+
+### Development Scripts (from source)
+```bash
+bun scripts/search.ts "your query"
+bun scripts/sync.ts [--force]
 ```
 
 ## Programmatic Usage
